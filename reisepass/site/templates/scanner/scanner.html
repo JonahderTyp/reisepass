@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Scanner{% endblock %}
+
+{% block content %}
+<div id="camera-container">
+    <video id="camera" autoplay playsinline></video>
+</div>
+<div id="scan-result">Scanning...</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
+<script>
+    const video = document.getElementById('camera');
+    const scanResult = document.getElementById('scan-result');
+
+    // Access the camera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function (stream) {
+            video.srcObject = stream;
+            video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+            video.play();
+            requestAnimationFrame(tick);
+        })
+        .catch(function (err) {
+            console.error("Error accessing the camera: ", err);
+            scanResult.textContent = "Error accessing the camera.";
+        });
+
+    function tick() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+
+            if (code) {
+                scanResult.textContent = `Scanned: ${code.data}`;
+                sendDataToAPI(code.data);
+            } else {
+                scanResult.textContent = "Scanning...";
+            }
+        }
+        requestAnimationFrame(tick);
+    }
+
+    function sendDataToAPI(data) {
+        alert(data);
+        fetch('/api/scan/1', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: data }),
+        })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Success:', result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+{% endblock %}
