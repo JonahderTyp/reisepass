@@ -1,0 +1,1 @@
+curl -X POST https://localhost:8443/api/scan/1 -H "Content-Type: application/json" -d '{"data":"FrTh12"}' -k

@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    container_name: reisepass
+    restart: always
+    ports:
+      - "8443:8443"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=mysecretkey
+      - DATABASE_URL=sqlite:///../instance/app.db
+      - FLASK_DEBUG=False
+      - WERKZEUGLOG=False
+    volumes:
+      - ./instance:/app/instance
+    depends_on: []

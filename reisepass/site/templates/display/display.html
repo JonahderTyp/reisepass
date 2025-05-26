@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Scanner{% endblock %}
+
+{% block content %}
+<h1>Scanner <span id="scanner-id-display"></span></h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <span id="vorname">Keine Daten</span>
+            <span id="nachname"></span>
+        </h3>
+    </div>
+    <div class="card-body">
+        <p>
+            <span id="geburtstag"></span>
+        </p>
+    </div>
+</div>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+    const scannerId = 1;  // assuming you pass this in from Flask
+    const socket = io();
+
+    socket.on(`scaner${scannerId}`, function (data) {
+        const member = data.member;
+
+        document.getElementById("vorname").textContent = member.vorname || "Keine Daten";
+        document.getElementById("nachname").textContent = member.nachname || "";
+        document.getElementById("geburtstag").textContent = member.geburtstag || "";
+    });
+</script>
+{% endblock %}
