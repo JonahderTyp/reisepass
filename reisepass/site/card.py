@@ -46,8 +46,8 @@ def generate_id_pdf(data, size=3):
     text_margin = 20/size  # inner margin for text and QR code within each card
     qr_size = 200/size      # size (in points) for the QR code
     plane_image_path = "./reisepass/database/plane.png"  # Path to the plane image file
-    plane_width = 400/size  # desired width in points for the plane image
-    plane_height = 400/size  # desired height in points for the plane image
+    plane_width = 300/size  # desired width in points for the plane image
+    plane_height = 300/size  # desired height in points for the plane image
 
     size_bold = 44/size
     size_regular = 36/size
@@ -71,7 +71,7 @@ def generate_id_pdf(data, size=3):
         # plane_x = x + card_width - text_margin - plane_width
         # plane_y = y + card_height - text_margin - plane_height
         plane_x = x + (card_width - plane_width) / 2
-        plane_y = y + (card_height - plane_height) / 2 + 20
+        plane_y = y + (card_height - plane_height) / 2
         try:
             c.drawImage(plane_image_path, plane_x, plane_y,
                         width=plane_width, height=plane_height,
@@ -140,11 +140,17 @@ def generate_id_pdf(data, size=3):
     return buffer
 
 
+@card_site.route("/")
+def index():
+    return render_template("card/download.html")
+
+
 @card_site.get("/download")
 def download():
     # Sample data for demonstration. In a real scenario, you might retrieve this from a database or request.
-    data = [m.to_dict() for m in member.get_all()]
-    pdf_buffer = generate_id_pdf(member.get_all())
+    size = request.args.get("size", default=3, type=int)
+    print(f"Generating ID cards with size: {size}")
+    pdf_buffer = generate_id_pdf(member.get_all(), size=int(size))
     return send_file(pdf_buffer,
                      as_attachment=False,
                      download_name="id_cards.pdf",
