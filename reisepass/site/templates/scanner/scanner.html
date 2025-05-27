@@ -12,6 +12,7 @@
 <script>
     const video = document.getElementById('camera');
     const scanResult = document.getElementById('scan-result');
+    var last_data = "";
 
     // Access the camera
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
@@ -49,7 +50,12 @@
     }
 
     function sendDataToAPI(data) {
-        alert(data);
+        // Prevent sending the same data multiple times
+        if (data === last_data) {
+            return;
+        }
+        last_data = data;
+        //alert(data);
         fetch('/api/scan/1', {
             method: 'POST',
             headers: {
