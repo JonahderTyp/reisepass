@@ -1,34 +1,82 @@
 {% extends 'base.html' %}
 
-{% block title %}Scanner{% endblock %}
+{% block title %}Scanner – Anzeigetafel{% endblock %}
 
-{% block content %}
-<h1>Scanner <span id="scanner-id-display"></span></h1>
+{% block navbar %}
+{# Falls Du eine Navbar brauchst, hier einfügen, sonst leer lassen #}
+{% endblock %}
 
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">
-            <span id="vorname">Keine Daten</span>
-            <span id="nachname"></span>
-        </h3>
-    </div>
-    <div class="card-body">
-        <p>
-            <span id="geburtstag"></span>
-        </p>
+{% block content_override %}
+<style>
+    /* Board-Container */
+    .flight-board {
+        background-color: #000;
+        color: #0f9;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 1rem rgba(0, 255, 0, 0.2);
+    }
+
+    /* Jede Zeile wie beim Flip-Board */
+    .board-row {
+        display: flex;
+        border-bottom: 1px solid #0f9;
+        padding: 0.5rem 0;
+        font-size: 1.25rem;
+    }
+
+    .board-row:last-child {
+        border-bottom: none;
+    }
+
+    .board-cell {
+        flex: 1;
+        text-align: center;
+    }
+
+    .board-label {
+        flex: 0 0 8rem;
+        font-weight: bold;
+        text-align: right;
+        padding-right: 1rem;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="flight-board">
+        <div class="board-row">
+            <div class="board-label">Vorname</div>
+            <div class="board-cell" id="vorname">Keine Daten</div>
+        </div>
+        <div class="board-row">
+            <div class="board-label">Nachname</div>
+            <div class="board-cell" id="nachname">-</div>
+        </div>
+        <div class="board-row">
+            <div class="board-label">Geburtsdatum</div>
+            <div class="board-cell" id="geburtstag">-</div>
+        </div>
+        <div class="board-row">
+            <div class="board-label">Größe</div>
+            <div class="board-cell" id="size">-</div>
+        </div>
     </div>
 </div>
+
 <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 <script>
-    const scannerId = 1;  // assuming you pass this in from Flask
+    const scannerId = 1;  // gegebenenfalls von Flask vorbelegen
     const socket = io();
 
     socket.on(`scaner${scannerId}`, function (data) {
-        const member = data.member;
-
+        const member = data.member || {};
+        //alert("Daten empfangen: " + JSON.stringify(member));
         document.getElementById("vorname").textContent = member.vorname || "Keine Daten";
-        document.getElementById("nachname").textContent = member.nachname || "";
-        document.getElementById("geburtstag").textContent = member.geburtstag || "";
+        document.getElementById("nachname").textContent = member.nachname || "-";
+        document.getElementById("geburtstag").textContent = member.geburtstag || "-";
+        document.getElementById("size").textContent = member.size || "-";
+
     });
 </script>
 {% endblock %}
