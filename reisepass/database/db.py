@@ -57,7 +57,7 @@ class member(BaseTable):
     vorname: Mapped[str] = mapped_column(String(255), nullable=False)
     nachname: Mapped[str] = mapped_column(String(255), nullable=False)
     geburtstag: Mapped[str] = mapped_column(String(255), nullable=False)
-    size: Mapped[str] = mapped_column(nullable=False)
+    size: Mapped[str] = mapped_column(String(255), nullable=False)
 
     @staticmethod
     def get_via_code(code: str) -> member:
