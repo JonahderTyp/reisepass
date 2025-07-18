@@ -1,15 +1,16 @@
 from flask import Blueprint, redirect, render_template, session, url_for
 
 from ..database.exceptions import ElementDoesNotExsist
+from .admin import admin_site
 from .card import card_site
 from .display import display_site
 from .scanner import scanner_site
 
 site = Blueprint("site", __name__, template_folder="templates")
 
-
-site.register_blueprint(scanner_site)
+site.register_blueprint(admin_site)
 site.register_blueprint(card_site)
+site.register_blueprint(scanner_site)
 site.register_blueprint(display_site)
 
 
