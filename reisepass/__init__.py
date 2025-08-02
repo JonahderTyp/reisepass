@@ -5,7 +5,7 @@ from pathlib import Path
 from flask import Flask
 from flask_socketio import SocketIO
 
-from .database.seeds import seed_database, seed_demo
+from .database.seeds import seed_csv, seed_database
 
 socketio = SocketIO()
 
@@ -43,7 +43,7 @@ def create_app():
         if NEW_DB:
             logging.info("All tables are empty. Seeding database...")
             seed_database()
-            seed_demo()
+            seed_csv()
 
     from .site import site
     app.register_blueprint(site)

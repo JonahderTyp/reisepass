@@ -111,7 +111,7 @@ class member(BaseTable):
     __tablename__ = "member"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    code: Mapped[str] = mapped_column(String(255), nullable=False)
+    code: Mapped[str] = mapped_column(String(255), nullable=True)
     vorname: Mapped[str] = mapped_column(String(255), nullable=False)
     nachname: Mapped[str] = mapped_column(String(255), nullable=False)
     geburtstag: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -121,11 +121,9 @@ class member(BaseTable):
         ForeignKey("stufe.id"), nullable=False)
     stufe: Mapped[stufe] = relationship("stufe", back_populates="members")
 
-    def update(self, code: Optional[str] = None, vorname: Optional[str] = None,
+    def update(self, vorname: Optional[str] = None,
                nachname: Optional[str] = None, geburtstag: Optional[str] = None,
                jsondata: Optional[dict] = None, stufe: Optional[stufe] = None) -> member:
-        if code:
-            self.code = code
         if vorname:
             self.vorname = vorname
         if nachname:
@@ -144,7 +142,19 @@ class member(BaseTable):
         if stufe:
             self.stufe_id = stufe.id
         db.session.commit()
+        self._update_code()
         return self
+
+    def _make_code(self) -> str:
+        """Generate a code based on vorname, nachname, and geburtstag."""
+        return (
+            self.vorname[:2] + self.nachname[:2] + self.geburtstag[:2]
+        ).upper()
+
+    def _update_code(self):
+        """Update the code based on vorname, nachname, and geburtstag."""
+        self.code = self._make_code()
+        db.session.commit()
 
     @staticmethod
     def get_via_code(code: str) -> member:
@@ -155,12 +165,14 @@ class member(BaseTable):
         return item
 
     @staticmethod
-    def create_new(code: str, vorname: str, nachname: str, geburtstag: str, jsondata: dict, stufe: stufe) -> member:
+    def create_new(vorname: str, nachname: str, geburtstag: str, jsondata: dict, stufe: stufe) -> member:
+        m = member(vorname=vorname, nachname=nachname,
+                   geburtstag=geburtstag, jsondata=jsondata, stufe_id=stufe.id)
+        code = m._make_code()
         if member.filter_by(code=code):
             raise ElementAlreadyExists(
                 f"Mitglied mit dem Code \"{code}\" existiert bereits")
-        m = member(code=code, vorname=vorname, nachname=nachname,
-                   geburtstag=geburtstag, jsondata=jsondata, stufe_id=stufe.id)
         db.session.add(m)
         db.session.commit()
+        m._update_code()
         return m
