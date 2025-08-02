@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.13-slim
+FROM python:3.14
 
 # Set the working directory in the container
 WORKDIR /app
@@ -20,9 +20,7 @@ RUN mkdir -p /app/instance
 # ENV DATABASE_URL=sqlite:///instance/app.db
 
 # Expose the port Gunicorn will run on
-EXPOSE 8443
+EXPOSE 8000
 
 # Command to run Gunicorn with Flask app
-CMD ["gunicorn", "--certfile=cert.pem", "--keyfile=key.pem", "-w", "1", "-b", "0.0.0.0:8443", "reisepass:create_app()"]
-# gunicorn --certfile=cert.pem --keyfile=key.pem -w 1 -b 0.0.0.0:8000 reisepass:create_app()
-
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "reisepass:create_app()"]
