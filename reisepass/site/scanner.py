@@ -10,5 +10,10 @@ scanner_site = Blueprint(
 
 
 @scanner_site.get("/")
+def configure():
+    return render_template("scanner/configure.html")
+
+
+@scanner_site.get("/scanner")
 def scanner():
     return render_template("scanner/scanner.html")

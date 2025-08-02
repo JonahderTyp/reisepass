@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Scanner{% endblock %}
+
+{% block content %}
+
+<form action="{{url_for('.scanner')}}" method="get" class="mt-4 p-4 border rounded shadow-sm bg-light">
+    <div class="mb-3">
+        <label for="idInput" class="form-label">Enter ID</label>
+        <input type="text" class="form-control" id="idInput" name="id" placeholder="Enter your ID" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}

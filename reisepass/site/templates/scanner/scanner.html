@@ -3,30 +3,79 @@
 {% block title %}Scanner{% endblock %}
 
 {% block content %}
+
+<style>
+    #camera-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        overflow: hidden;
+        background-color: #000;
+    }
+
+    #camera {
+        width: 100%;
+        height: auto;
+        max-height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+
 <div id="camera-container">
     <video id="camera" autoplay playsinline></video>
 </div>
+
+<label for="camera-select">Choose Camera:</label>
+<select id="camera-select"></select>
+
+<p>Scanner{{ request.args.get('id')|default('1') }}</p>
 <div id="scan-result">Scanning...</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.min.js"></script>
 <script>
     const video = document.getElementById('camera');
     const scanResult = document.getElementById('scan-result');
+    const cameraSelect = document.getElementById('camera-select');
     var last_data = "";
     const id = "{{ request.args.get('id')|default('1') }}";
 
-    // Access the camera
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(function (stream) {
-            video.srcObject = stream;
-            video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-            video.play();
-            requestAnimationFrame(tick);
+    // List available cameras
+    navigator.mediaDevices.enumerateDevices()
+        .then(function (devices) {
+            devices.filter(device => device.kind === 'videoinput')
+                .forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
         })
         .catch(function (err) {
-            console.error("Error accessing the camera: ", err);
-            scanResult.textContent = "Error accessing the camera.";
+            console.error('Error enumerating devices:', err);
         });
+
+    // Access the selected camera
+    cameraSelect.addEventListener('change', function () {
+        const selectedDeviceId = cameraSelect.value;
+        startCamera(selectedDeviceId);
+    });
+
+    function startCamera(deviceId) {
+        navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId ? { exact: deviceId } : undefined } })
+            .then(function (stream) {
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                video.play();
+                requestAnimationFrame(tick);
+            })
+            .catch(function (err) {
+                console.error("Error accessing the camera: ", err);
+                scanResult.textContent = "Error accessing the camera.";
+            });
+    }
 
     function tick() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -72,5 +121,8 @@
                 console.error('Error:', error);
             });
     }
+
+    // Start with the default camera
+    startCamera();
 </script>
 {% endblock %}
