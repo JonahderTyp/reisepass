@@ -26,6 +26,9 @@ def seed_csv(csv_file_path='./instance/seed.csv'):
             nachname = row.get('Nachname')
             geburtstag = row.get('Geburtstag')
             gruppe = row.get('Gruppe', "")
+            beruf = row.get('Beruf')
+            if not beruf:
+                beruf = generiere_pfadfinder_beruf()
 
             s = stufe.get_via_name(gruppe)
 
@@ -33,7 +36,7 @@ def seed_csv(csv_file_path='./instance/seed.csv'):
                 vorname=vorname,
                 nachname=nachname,
                 geburtstag=geburtstag,
-                jsondata={"beruf": generiere_pfadfinder_beruf()},
+                jsondata={"beruf": beruf},
                 stufe=s,
             )
             print(f"Added {m.to_dict()}")
