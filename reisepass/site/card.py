@@ -7,8 +7,10 @@ from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
 from reportlab.graphics.shapes import Drawing
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph
 
 from ..database.db import member
 from ..database.exceptions import ElementDoesNotExsist
@@ -53,6 +55,12 @@ def generate_id_pdf(data, size=3):
     size_regular = 36/size
     size_small = 24/size
 
+    styles = getSampleStyleSheet()
+    detail_style = styles["Normal"].clone('detail_style')
+    detail_style.fontName = "Helvetica"
+    detail_style.fontSize = size_regular
+    detail_style.leading = size_regular * 1.2
+
     person: member
     for idx, person in enumerate(data):
         card_index = idx % size ** 2
@@ -90,19 +98,23 @@ def generate_id_pdf(data, size=3):
         text_y -= size_bold  # move down for the next line
         c.drawString(text_x, text_y, person.nachname)
 
-        # Draw additional details in regular font
-        c.setFont("Helvetica", size_regular)
+        beruf = person.jsondata.get("beruf", "Pfadfinder")
+
+        # Draw additional details in regular font, word-wrapped
         details = [
             f"Geburtstag: {person.geburtstag}",
-            f"Größe: {person.size}",
+            f"Stufe: {person.stufe.name}",
+            f"{beruf}",
         ]
-        for detail in details:
-            text_y -= size_regular  # move down for each line
-            c.drawString(text_x, text_y, detail)
+        detail_text = "<br/>".join(details)
+        para = Paragraph(detail_text, detail_style)
+        w, h = para.wrap(card_width - 2 * text_margin, card_height)
+        text_y -= h  # move down for the paragraph height
+        para.drawOn(c, text_x, text_y)
 
         # Create a QR code with demo data
         qr_data = person.code
-        qr_code = qr.QrCodeWidget(qr_data, barLevel='H', qrVersion=1)
+        qr_code = qr.QrCodeWidget(qr_data, barLevel='M')
         bounds = qr_code.getBounds()
         qr_width_val = bounds[2] - bounds[0]
         qr_height_val = bounds[3] - bounds[1]
@@ -114,6 +126,10 @@ def generate_id_pdf(data, size=3):
         qr_x = x + card_width - qr_size - text_margin
         qr_y = y + text_margin
         renderPDF.draw(d, c, qr_x, qr_y)
+        c.setFont("Helvetica-Oblique", size_small)
+        c.drawString(qr_x + (qr_size / 4),
+                     qr_y + qr_size - size_small,
+                     qr_data)
 
         c.setFont("Helvetica-Oblique", size_small)
         details = [
