@@ -10,5 +10,10 @@ display_site = Blueprint(
 
 
 @display_site.get("/")
+def configure():
+    return render_template("display/configure.html")
+
+
+@display_site.get("/display")
 def display():
     return render_template("display/display.html")
