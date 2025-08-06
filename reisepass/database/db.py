@@ -149,7 +149,7 @@ class member(BaseTable):
         """Generate a code based on vorname, nachname, and geburtstag."""
         return (
             self.vorname[:2] + self.nachname[:2] + self.geburtstag[:2]
-        ).upper()
+        ).upper().replace("Ä", "A").replace("Ö", "O").replace("Ü", "U").replace("ß", "S")
 
     def _update_code(self):
         """Update the code based on vorname, nachname, and geburtstag."""
