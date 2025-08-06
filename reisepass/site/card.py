@@ -46,7 +46,7 @@ def generate_id_pdf(data, size=3):
     card_height = avail_height / size
 
     text_margin = 20/size  # inner margin for text and QR code within each card
-    qr_size = 200/size      # size (in points) for the QR code
+    qr_size = 250/size      # size (in points) for the QR code
     plane_image_path = "./reisepass/database/plane.png"  # Path to the plane image file
     plane_width = 300/size  # desired width in points for the plane image
     plane_height = 300/size  # desired height in points for the plane image
@@ -123,7 +123,7 @@ def generate_id_pdf(data, size=3):
                     qr_size/qr_width_val, 0, 0, qr_size/qr_height_val, 0, 0])
         d.add(qr_code)
         # Position the QR code at the bottom-right of the card
-        qr_x = x + card_width - qr_size - text_margin
+        qr_x = x + card_width - qr_size + (text_margin/2)
         qr_y = y + text_margin
         renderPDF.draw(d, c, qr_x, qr_y)
         c.setFont("Helvetica-Oblique", size_small)
