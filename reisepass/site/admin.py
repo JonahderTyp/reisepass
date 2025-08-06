@@ -15,6 +15,11 @@ admin_site = Blueprint(
     "admin", __name__, template_folder="templates", url_prefix="/admin")
 
 
+@admin_site.route("/")
+def index():
+    return redirect(url_for(".users"))
+
+
 @admin_site.route("/users")
 def users():
     """

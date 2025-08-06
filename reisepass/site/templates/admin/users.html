@@ -4,12 +4,14 @@
 <div class="container-fluid">
 
     <!-- {{ members }} -->
+    <h1>Members</h1>
 
     {% for member in members %}
     <form action="./change" method="get">
         <div class="row mb-1">
             <!-- <p class="col">{{ member }}</p> -->
             <p class="col">{{ member.id }}.</p>
+            <p class="col font-monospace">{{ member.code }}</p>
             <p class="col">{{ member.vorname }}</p>
             <p class="col">{{ member.nachname }}</p>
             <p class="col">{{ member.stufe.name }}</p>
