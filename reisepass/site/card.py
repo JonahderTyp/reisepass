@@ -135,9 +135,9 @@ def generate_id_pdf(data, size=3):
         details = [
             "DPSG St. Stephanus Beckum",
             "Simon Wessel:",
-            "0176 12345678",
+            "01575 0750304",
             "Nele Braunart:",
-            "0176 87654321",
+            "01417 3047006",
             "Zeltplatz:",
             "Talsperrenstraße 90",
             "53881 Euskirchen"
