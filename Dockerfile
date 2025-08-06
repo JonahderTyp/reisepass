@@ -23,4 +23,4 @@ RUN mkdir -p /app/instance
 EXPOSE 8000
 
 # Command to run Gunicorn with Flask app
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "reisepass:create_app()"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "-w", "1", "--worker-class", "eventlet", "--access-logfile", "-", "--error-logfile", "-", "reisepass:create_app()"]

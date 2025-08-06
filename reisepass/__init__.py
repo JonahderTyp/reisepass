@@ -26,6 +26,7 @@ def create_app():
     if CONFIG_PATH.is_file():
         app.config.from_pyfile(str(CONFIG_PATH))
         logging.info(f"Loaded Config from {CONFIG_PATH}")
+        logging.info(f"Config: {app.config}")
         if app.config.get("DEBUG", False):
             logging.info(f"Config:{str(app.config)}")
     else:

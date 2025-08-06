@@ -3,8 +3,6 @@ services:
     build: .
     container_name: reisepass
     restart: always
-    ports:
-      - "8443:8443"
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=mysecretkey
@@ -14,3 +12,9 @@ services:
     volumes:
       - ./instance:/app/instance
     depends_on: []
+    networks:
+      - nginx_proxy
+
+networks:
+  nginx_proxy:
+    external: true  # Use an existing network
