@@ -12,11 +12,6 @@ api = Blueprint("api", __name__, template_folder="templates",
                 url_prefix="/api")
 
 
-@api.errorhandler(404)
-def page_not_found(e):
-    return "NOT FOUND", 404
-
-
 @api.errorhandler(ElementDoesNotExsist)
 def handle_element_does_not_exist(error):
     return "NOT FOUND", 404
@@ -24,12 +19,14 @@ def handle_element_does_not_exist(error):
 
 @api.post("/scan/<int:scanner_id>")
 def scan(scanner_id: int):
-    code = dict(json.loads(request.data)).get("data")
     try:
+        code = dict(json.loads(request.data)).get("data")
         mem = member.get_via_code(code)
     except ElementDoesNotExsist:
-        print(f"Member with code {code} not found")
-        abort(404)
+        return f"Member with code {code} not found", 404
+    except json.JSONDecodeError:
+        print("Invalid JSON data received")
+        abort(400, description=f"Invalid JSON format {request.data}")
     print(f"Emitting to scanner{scanner_id} with {mem.to_dict()}")
     socketio.emit(f"scaner{scanner_id}", {"member": mem.to_dict()})
     return "OK", 200
