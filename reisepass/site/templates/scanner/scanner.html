@@ -42,30 +42,21 @@
     var last_data = "";
     const id = "{{ request.args.get('id')|default('1') }}";
 
-    // List available cameras
-    navigator.mediaDevices.enumerateDevices()
-        .then(function (devices) {
-            devices.filter(device => device.kind === 'videoinput')
-                .forEach((device, index) => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || `Camera ${index + 1}`;
-                    cameraSelect.appendChild(option);
-                });
-        })
-        .catch(function (err) {
-            console.error('Error enumerating devices:', err);
-        });
 
-    // Access the selected camera
-    cameraSelect.addEventListener('change', function () {
-        const selectedDeviceId = cameraSelect.value;
-        startCamera(selectedDeviceId);
-    });
+    let currentStream = null;
+
+    function stopCurrentStream() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+    }
 
     function startCamera(deviceId) {
+        stopCurrentStream();
         navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId ? { exact: deviceId } : undefined } })
             .then(function (stream) {
+                currentStream = stream;
                 video.srcObject = stream;
                 video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
                 video.play();
@@ -76,6 +67,50 @@
                 scanResult.textContent = "Error accessing the camera.";
             });
     }
+
+    function chooseAndStartCamera(devices) {
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        cameraSelect.innerHTML = '';
+        let preferredDeviceId = null;
+        videoDevices.forEach((device, index) => {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.text = device.label || `Camera ${index + 1}`;
+            cameraSelect.appendChild(option);
+            // Try to auto-select the back/environment camera
+            if (!preferredDeviceId && device.label && /(back|environment)/i.test(device.label)) {
+                preferredDeviceId = device.deviceId;
+            }
+        });
+        // If no label matched, default to the last camera (often the back camera on mobile)
+        if (!preferredDeviceId && videoDevices.length > 1) {
+            preferredDeviceId = videoDevices[videoDevices.length - 1].deviceId;
+        }
+        // If still not found, just use the first
+        if (!preferredDeviceId && videoDevices.length > 0) {
+            preferredDeviceId = videoDevices[0].deviceId;
+        }
+        if (preferredDeviceId) {
+            cameraSelect.value = preferredDeviceId;
+            startCamera(preferredDeviceId);
+        }
+    }
+
+    cameraSelect.addEventListener('change', function () {
+        const selectedDeviceId = cameraSelect.value;
+        startCamera(selectedDeviceId);
+    });
+
+    // List available cameras and start the preferred one
+    navigator.mediaDevices.enumerateDevices()
+        .then(function (devices) {
+            chooseAndStartCamera(devices);
+        })
+        .catch(function (err) {
+            console.error('Error enumerating devices:', err);
+            // fallback: try to start default camera
+            startCamera();
+        });
 
     function tick() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
