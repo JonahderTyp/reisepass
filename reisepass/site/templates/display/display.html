@@ -45,24 +45,48 @@
 
 <div class="container my-5">
     <div class="flight-board">
+        <div class="board-row"></div>
+        {% if request.args.get('von') %}
+        <div class="board-row">
+            <div class="board-label">Von</div>
+            <div class="board-cell">{{request.args.get('von')}}</div>
+        </div>
+        {% endif %}
+        {% if request.args.get('nach') %}
+        <div class="board-row">
+            <div class="board-label">Nach</div>
+            <div class="board-cell">{{request.args.get('nach')}}</div>
+        </div>
+        {% endif %}
+        {% if request.args.get('von') or request.args.get('nach') %}
+        <div class="my-5"></div>
+        <div class="board-row"></div>
+        {% endif %}
         <div class="board-row">
             <div class="board-label">Vorname</div>
-            <div class="board-cell" id="vorname">Keine Daten</div>
+            <div class="board-cell" id="vorname"></div>
         </div>
         <div class="board-row">
             <div class="board-label">Nachname</div>
-            <div class="board-cell" id="nachname">-</div>
+            <div class="board-cell" id="nachname"></div>
+        </div>
+        <div class="board-row">
+            <div class="board-label">Stufe</div>
+            <div class="board-cell" id="stufe"></div>
         </div>
         <div class="board-row">
             <div class="board-label">Geburtsdatum</div>
-            <div class="board-cell" id="geburtstag">-</div>
+            <div class="board-cell" id="geburtstag"></div>
         </div>
         <div class="board-row">
-            <div class="board-label">Größe</div>
-            <div class="board-cell" id="size">-</div>
+            <div class="board-label">Beruf</div>
+            <div class="board-cell" id="size"></div>
         </div>
+        <div class="board-row"></div>
     </div>
 </div>
+
+<span id="memberdata"></span>
 
 <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 <script>
@@ -71,12 +95,14 @@
 
     socket.on(`scaner${scannerId}`, function (data) {
         const member = data.member || {};
+        console.log("Empfangene Daten:", member);
         //alert("Daten empfangen: " + JSON.stringify(member));
         document.getElementById("vorname").textContent = member.vorname || "Keine Daten";
         document.getElementById("nachname").textContent = member.nachname || "-";
         document.getElementById("geburtstag").textContent = member.geburtstag || "-";
-        document.getElementById("size").textContent = member.size || "-";
-
+        document.getElementById("stufe").textContent = member.stufe.name || "-";
+        document.getElementById("size").textContent = member.jsondata.beruf || "-";
+        document.getElementById("memberdata").textContent = JSON.stringify(member) || "-";
     });
 </script>
 {% endblock %}
